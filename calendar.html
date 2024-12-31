@@ -1,0 +1,117 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
+<title>一日一創カレンダー</title>
+</head><body>
+
+<header>
+<h1>一日一創カレンダー <select id=selyear></select></h1>
+</header>
+
+<main id=main></main>
+
+<style>
+body {
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  font-size: 2vw;
+  font-family: sans-serif;
+}
+header {
+  padding: 1em 0;
+  background-color: #ddd;
+  font-size: 180%;
+}
+#selyear {
+  font-size: 100%;
+  padding: .2em .5em;
+}
+calendar-view a {
+  text-decoration: none;
+  color: white;
+  -webkit-text-stroke: 2px #000 !important;
+  cursor: pointer;
+  display: block;
+  padding: .3em .1em .5em .1em;
+  x-background-color: red;
+}
+
+calendar-view > div {
+  vertical-align: top;
+}
+@media (min-width: 1100px) {
+  calendar-view > div {
+    display: inline-block;
+    width: 47vw;
+    margin: .5vw;
+  }
+  body {
+    font-size: 1vw;
+  }
+}
+calendar-view .days {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  margin: 0 0 .3em 0;
+}
+calendar-view .month {
+  font-size: 200%;
+  text-align: center;
+}
+calendar-view .days > div {
+  border: 1px solid gray;
+  text-align: center;
+  height: 2em;
+  font-size: 300%;
+  font-weight: bold;
+  color: white;
+  -webkit-text-stroke: 2px #000;
+}
+</style>
+
+<script type="module">
+import { CSV } from "https://js.sabae.cc/CSV.js";
+import { Day } from "https://code4fukui.github.io/day-es/Day.js";
+import { CalendarView } from "https://code4fukui.github.io/calendar-view/calendar-view.js";
+import { ArrayUtil } from "https://js.sabae.cc/ArrayUtil.js";
+
+//const url = "https://fukuno.jig.jp/blog.csv?1";
+const url = "./blog.csv";
+const data = await CSV.fetchJSON(url);
+console.log(data);
+
+const years = ArrayUtil.toUnique(data.map(d => new Day(d.date).year)).sort();
+for (const y of years) {
+  const op = document.createElement("option");
+  op.textContent = y;
+  selyear.appendChild(op);
+}
+selyear.value = document.location.hash.substring(1) || years[years.length - 1];
+
+const show = () => {
+  const year = selyear.value;
+  
+  main.innerHTML = "";
+  const cal = new CalendarView(year);
+  main.appendChild(cal);
+  for (const d of data) {
+    const dt = new Day(d.date).toStringYMD();
+    const div = cal.querySelector(".c" + dt);
+    //console.log(dt, div);
+    if (div) {
+      //div.textContent = d.title;
+      div.style.backgroundImage = `url(${d.img})`;
+      div.style.backgroundRepeat = "no-repeat";
+      div.style.backgroundSize = "cover";
+      div.style.backgroundPosition = "center center";
+
+      div.innerHTML = `<a href=${d.url}>${div.textContent}</a>`;
+      div.setAttribute("title", d.title);
+    }
+  }
+};
+show();
+selyear.onchange = show;
+</script>
+
+</body>
+</html>

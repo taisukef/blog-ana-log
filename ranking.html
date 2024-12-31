@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
+<title>ランキング2024</title>
+</head>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1a1a1a;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+.container {
+    overflow: hidden; /* アニメーションが出すぎないように隠す */
+}
+.text {
+    max-width: 75vw;
+    font-size: 2.5rem;
+    font-weight: bold;
+    opacity: 0; /* 最初は非表示 */
+    transform: translateY(50px); /* 下にずらしておく */
+    animation: slideIn 1.5s ease-out forwards; /* アニメーションを適用 */
+}
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<body>
+<div class="container">
+    <div class="text" id=divtext></div>
+</div>
+
+<script type="module">
+import { CSV } from "https://js.sabae.cc/CSV.js";
+import { confetti } from "https://code4fukui.github.io/confetti-es/confetti.js";
+
+const cracker = () => {
+  const opt = {
+    particleCount: 150,
+    startVelocity: 70,
+    angle: 70,
+    spread: 30,
+    origin: { x: 0, y : 1 },
+  };
+  confetti(opt);
+  opt.angle = 180 - opt.angle;
+  opt.origin.x = 1;
+  confetti(opt);
+};
+
+const ranking = await CSV.fetchJSON("ranking-2024.csv");
+const blog = await CSV.fetchJSON("blog.csv");
+ranking.forEach(i => {
+  const a = blog.find(j => j.id == i.path.substring(1));
+  i.date = a.date;
+  i.title = a.title;
+  i.url = a.url;
+});
+
+let i = 9;
+setInterval(() => {
+  divtext.classList.remove("text");
+  const item = ranking[i];
+  divtext.innerHTML = (i + 1) + "位 " + item.date.substring(0, 10) + " " + item.pv + "PV<br>" + item.title;
+  divtext.onclick = () => {
+    open(item.url, "_blank");
+  };
+  void divtext.offsetWidth;
+  divtext.classList.add("text");
+  if (i > 0) {
+    cracker();
+    i--;
+  } else {
+    cracker();
+    setTimeout(cracker, 300);
+    setTimeout(cracker, 600);
+    i = 9;
+  }
+}, 3000);
+</script>
+
+</body>
+</html>
+
