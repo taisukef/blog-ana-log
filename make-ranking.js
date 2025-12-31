@@ -2,7 +2,15 @@ import { dir2array } from "https://js.sabae.cc/dir2array.js";
 import { Day } from "https://js.sabae.cc/DateTime.js";
 import { CSV } from "https://js.sabae.cc/CSV.js";
 
-const dir = "/Users/fukuno/res/log/fukuno.jig.jp";
+const year = new Date().getFullYear();
+//const dir = "/Users/fukuno/res/log/fukuno.jig.jp";
+const dir = "./log/fukuno.jig.jp/" + year + "/";
+
+const start2024 = 4177;
+const start = start2024 + Day.getLengthOfYear(2024);
+const nlen = Day.getLengthOfYear(year);
+//console.log(nlen, start + nlen)
+//Deno.exit();
 
 const fns = await dir2array(dir);
 
@@ -27,13 +35,10 @@ for (const fn of fns) {
 //console.log(histo);
 const ranking0 = Object.entries(histo);
 const ranking1 = ranking0.filter(i => parseInt(i[0].substring(1)).toString() == i[0].substring(1));
-// 4177 2024/1/1-
-const start = 4177;
-const nlen = Day.getLengthOfYear(2024);
 const ranking = ranking1.filter(i => parseInt(i[0].substring(1)) >= start && parseInt(i[0].substring(1)) < start + nlen);
 ranking.sort((a, b) => b[1] - a[1]);
 for (let i = 0; i < nlen - 1; i++) {
   console.log(ranking[i]);
 }
 ranking.unshift(["path", "pv"]);
-await Deno.writeTextFile("ranking-2024.csv", CSV.encode(ranking))
+await Deno.writeTextFile("ranking-" + year + ".csv", CSV.encode(ranking));
