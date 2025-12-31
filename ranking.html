@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
-<title>ランキング2024</title>
+<title>一日一創アクセスランキング</title>
 </head>
 <style>
 body {
@@ -22,6 +22,10 @@ body {
     opacity: 0; /* 最初は非表示 */
     transform: translateY(50px); /* 下にずらしておく */
     animation: slideIn 1.5s ease-out forwards; /* アニメーションを適用 */
+}
+.text img {
+  margin: .8em;
+  height: 50vh;
 }
 @keyframes slideIn {
     0% {
@@ -58,20 +62,31 @@ const cracker = () => {
   confetti(opt);
 };
 
-const ranking = await CSV.fetchJSON("ranking-2024.csv");
-const blog = await CSV.fetchJSON("blog.csv");
+const year = location.hash.substring(1) || 2024;
+
+const ranking = await CSV.fetchJSON("ranking-" + year + ".csv");
+console.log(ranking);
+const blogfn = "./blog.csv";
+// const blogfn = "https://fukuno.jig.jp/blog.csv"; // not support CORS
+const blog = await CSV.fetchJSON(blogfn);
+console.log(blog);
 ranking.forEach(i => {
   const a = blog.find(j => j.id == i.path.substring(1));
-  i.date = a.date;
-  i.title = a.title;
-  i.url = a.url;
+  if (a) {
+    i.date = a.date;
+    i.title = a.title;
+    i.url = a.url;
+    i.img = a.img;
+  } else {
+    console.log("can't ", i);
+  }
 });
 
 let i = 9;
 setInterval(() => {
   divtext.classList.remove("text");
   const item = ranking[i];
-  divtext.innerHTML = (i + 1) + "位 " + item.date.substring(0, 10) + " " + item.pv + "PV<br>" + item.title;
+  divtext.innerHTML = (i + 1) + "位 " + item.date.substring(0, 10) + " " + item.pv + "PV<br>" + item.title + "<br><img src=" + item.img + ">";
   divtext.onclick = () => {
     open(item.url, "_blank");
   };
